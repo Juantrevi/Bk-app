@@ -60,6 +60,7 @@ const inputTransferAmount = document.querySelector('.form__input--amount');
 const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
+const transferMessage = document.querySelector('.transfer-message');
 
 //Compute the username
 //Username should be (The initials), we create a new property to the
@@ -120,9 +121,10 @@ const calcDisplaySummary = function (acc){
 //For example to end up with the balance of the account
 //The first parameter in this function is the accumulator, that accumulates the value of what we want to return
 //The reduce method also needs a value of starting the accumulator (Which in this case will be 0)
-const calcAndDisplayBalance = function (movements){
-  const balance = movements.reduce((accum, mov) => accum + mov, 0);
-  labelBalance.textContent = `${balance} €`;
+const calcAndDisplayBalance = function (acc){
+  acc.balance = acc.movements.reduce((accum, mov) => accum + mov, 0);
+
+  labelBalance.textContent = `${acc.balance} €`;
 };
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -210,38 +212,142 @@ btnLogin.addEventListener('click', function (e){
     //Clear the input fields
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();//So the field looses it's focus.
-    //Display movements
-    displayMovements(currentAccount.movements);
-    //Display balance
-    calcAndDisplayBalance(currentAccount.movements);
-    //display summary
-    calcDisplaySummary(currentAccount);
-
+    updateUserInterface(currentAccount);
   }
 
 });
+//-------------Update user UI -----------------------------
+
+const updateUserInterface = function (acc){
+  //Display movements
+  displayMovements(acc.movements);
+  //Display balance
+  calcAndDisplayBalance(acc);
+  //display summary
+  calcDisplaySummary(acc);
+}
+
+//---------------------------Transfer money----------------------------
+btnTransfer.addEventListener('click', function (e){
+  e.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcoount = accounts.find(acc => acc.username === inputTransferTo.value);
+
+  if (amount > 0 &&
+      currentAccount.balance >= amount &&
+      receiverAcoount?.username !== currentAccount.username &&
+      receiverAcoount){
+
+    currentAccount.movements.push(-amount);
+    receiverAcoount.movements.push(amount);
+    //Update UI
+    updateUserInterface(currentAccount);
 
 
+  }else {
+    transferMessage.textContent = `You dont have enough`
+  }
+  inputTransferAmount.value = '';
+  inputTransferTo.value = '';
 
+})
 
+//Close an account with the findIndex method
 
+btnClose.addEventListener('click', function (e){
+  e.preventDefault();
 
+  if (Number(inputClosePin.value) === currentAccount.pin && inputCloseUsername.value === currentAccount.username){
+    const index = accounts.findIndex(acc => acc.username === currentAccount.username);
+    //delete account
+    accounts.splice(index, 1);
+    //Hide UI
+    containerApp.style.opacity = 0;
+  }
+});
 
+//------Some and Every method--------
+//We can use the includes method to see if an array includes certain value
+console.log(movements);
+console.log(movements.includes(-130));
+// true
 
+//However this returns true if its exactly equal, testing for equiality.
+//If we want to test over a condition
+//See if there was a deposit in this account
 
+const anyDeposit = movements.some(mov => mov > 0);
+console.log(anyDeposit);
+// true
 
+//-----------------REQUEST A LOAN-------------------
+//It only gives a loan if there is a deposit with at least 10% of the requested loan amount
 
+btnLoan.addEventListener('click', function (e){
+  e.preventDefault();
+  const amount = Number(inputLoanAmount.value);
 
+  if (amount > 0 && currentAccount.movements.some(mov => mov >= amount *0.1)){
+    currentAccount.movements.push(amount);
+    updateUserInterface(currentAccount);
+  }
+  inputLoanAmount.value = '';
+})
 
+//EVERY
+//It only passes if ALL the elements in the array has a certain condition
+console.log(account4.movements.every(mov => mov > 0));
+//true
 
+//------------Flat methods-----------
+// removes all nested arrays and convert them into only one (Goes only one level deep)
+const arr = [[1, 2, 3], [4, 5, 6], 7, 8];
+console.log(arr.flat());
+// [1, 2, 3, 4, 5, 6, 7, 8]
 
+const arrDeeper = [[[1, 2], 3], [4, [5, 6]], 7, 8];
+console.log(arrDeeper.flat(2));
+// [1, 2, 3, 4, 5, 6, 7, 8]
 
+const accountMovements = accounts.map(acc => acc.movements);
+console.log(accountMovements);
+/*
+[200, 450, -400, 3000, -650, -130, 70, 1300]
+[5000, 3400, -150, -790, -3210, -1000, 8500, -30]
+[200, -200, 340, -300, -20, 50, 400, -460]
+[430, 1000, 700, 50, 90]
+*/
 
+const allMovements = accountMovements.flat();
+console.log(allMovements);
+// [200, 450, -400, 3000, -650, -130, 70, 1300, 5000, 3400, -150, -790, -3210, -1000, 8500, -30, 200, -200, 340, -300, -20, 50, 400, -460, 430, 1000, 700, 50, 90]
 
+const overAllBalance = allMovements.reduce((acc, mov) => acc + mov, 0);
+console.log(overAllBalance);
+// 17840
 
+//Same thing with flatMap
+const overAllFlatMap = accounts.flatMap(acc => acc.movements)
+                                .reduce((acc, mov) => acc + mov, 0);
+console.log(overAllFlatMap);
+// 17840
 
+//---------------------------SORT MOVEMENTS (Sorting arrays) --------------------------------------------------
+const owners = ['Jonas', 'Zach', 'Martha', 'Adam'];
+//This MUTATES the original array
+console.log(owners.sort())
+// ["Adam", "Jonas", "Martha", "Zach"]
 
-
+//Sort numbers
+//return <0, a, b
+//return > 0 a, b
+console.log(movements.sort((a, b) => {
+  if (a>b){
+    return 1;
+  }else if (b > a){
+    return -1;
+  }
+}));
 
 
 
