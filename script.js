@@ -75,11 +75,13 @@ console.log(accounts)
 
 //-----------------------------------------------------------------------------------------------------------------------
 //Function to display the movements of a user
-const displayMovements = function (movements){
+const displayMovements = function (movements, sort = false){
   //First empty the html already there
   containerMovements.innerHTML = '';
 
-  movements.forEach(function (mov, i){
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+  movs.forEach(function (mov, i){
 
     //Check if the type is a deposit or withdrawal
     const type = mov > 0 ? 'deposit' : 'withdrawal';
@@ -338,18 +340,20 @@ const owners = ['Jonas', 'Zach', 'Martha', 'Adam'];
 console.log(owners.sort())
 // ["Adam", "Jonas", "Martha", "Zach"]
 
-//Sort numbers
-//return <0, a, b
-//return > 0 a, b
-console.log(movements.sort((a, b) => {
-  if (a>b){
-    return 1;
-  }else if (b > a){
-    return -1;
-  }
-}));
+//Sort numbers from smaller to bigger (Ascending)
+console.log(movements.sort((a, b) => a - b));
 
+//Sorting numbers from bigger to smaller (Descending)
+console.log(movements.sort((a, b) => b - a));
 
+//-------------IMPLEMENTING SORT ------------------------
+
+let sorted = false;
+btnSort.addEventListener('click', function (e){
+  e.preventDefault();
+  displayMovements(currentAccount.movements, !sorted)
+  sorted = !sorted;
+});
 
 
 
