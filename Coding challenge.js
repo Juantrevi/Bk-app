@@ -174,8 +174,35 @@ const ownersEatTooMuch = dogs.filter(dog => dog.curFood > dog.recFood)
 const ownersEatTooLittle = dogs.filter(dog => dog.curFood < dog.recFood)
     .flatMap(dog => dog.owners);
 
+//4-
 console.log(`${ownersEatTooMuch.join(' and ')}s dogs eat too
 much`)
 
 console.log(`${ownersEatTooLittle.join(' and ')}s dogs eat too
 little`)
+
+/*5. Log to the console whether there is any dog eating exactly the amount of food
+that is recommended (just true or false)*/
+
+const dogEatingExact = dogs.some(dog => (dog.recFood === dog.curFood));
+console.log(dogEatingExact);
+
+/*6. Log to the console whether there is any dog eating an okay amount of food
+(just true or false)*/
+
+const dogEatingOk = dogs.some(dog => (dog.recFood < dog.curFood));
+console.log(dogEatingOk);
+
+/*7. Create an array containing the dogs that are eating an okay amount of food (try
+to reuse the condition used in 6.)*/
+
+const dogsEatingOkArray = dogs.filter(dog => dog.recFood < dog.curFood);
+console.log(dogsEatingOkArray);
+
+
+
+
+
+
+
+
